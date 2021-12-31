@@ -11,3 +11,6 @@ build/
 data/
 dist/
 docs/_build/
+.python-version
+.pytest_cache/
+__pycache__/

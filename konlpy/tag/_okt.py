@@ -96,3 +96,38 @@ class Okt():
     def normalize(self, phrase):
         text = self.jki.normalize(phrase)
         return text
+
+    def add_to_dict(self, pos, values):
+        # import packages
+        processor_package = jpype.JPackage('org.openkoreantext.processor')
+        util_package = jpype.JPackage('org.openkoreantext.processor.util')
+        collection_package = jpype.JPackage('scala.collection')
+
+        # aliases
+        JavaConverters = collection_package.JavaConverters
+        Processor = processor_package.OpenKoreanTextProcessor
+        KoreanPos = util_package.KoreanPos
+
+        # make scala Seq
+        seq = jpype.java.util.ArrayList()
+        for value in values:
+            seq.add(value)
+        seq = JavaConverters.asScalaIteratorConverter(seq.iterator()).asScala().toSeq()
+
+        # add to dictionary
+        pos_dict = {
+            'Noun': KoreanPos.Noun(),
+            'Adverb': KoreanPos.Adverb(),
+            'Determiner': KoreanPos.Determiner(),
+            'Exclamation': KoreanPos.Exclamation(),
+            'Josa': KoreanPos.Josa(),
+            'Eomi': KoreanPos.Eomi(),
+            'PreEomi': KoreanPos.PreEomi(),
+            'Conjunction': KoreanPos.Conjunction(),
+            'Modifier': KoreanPos.Modifier(),
+            'VerbPrefix': KoreanPos.VerbPrefix(),
+            'Suffix': KoreanPos.Suffix(),
+        }
+        if pos not in pos_dict:
+            raise ValueError(f'Unsupported pos: {pos}. Allowed values: {", ".join(list(pos_dict))}')
+        Processor.addWordsToDictionary(pos_dict[pos], seq)
